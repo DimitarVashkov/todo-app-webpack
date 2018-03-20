@@ -10,13 +10,33 @@ function content() {
   const element = document.createElement('div');
   const addButton = button();
   addButton.addEventListener('click', addTask);
-  element.append(form('Title'));
-  element.append(form('Description'));
-  element.append(form('Due'));
-  element.append(form('Priority'));
+
+  const forms = todoForms();
+  for (let i in forms) {
+    element.append(forms[i]);
+  }
+
   element.append(addButton);
 
   return element;
+}
+
+function todoForms() {
+  const titleForm = form('Title');
+  const descForm = form('Description');
+  const dueForm = form('Due');
+  const priorityForm = form('Priority');
+
+  titleForm.required = true;
+  descForm.required = true;
+  dueForm.required = true;
+  priorityForm.required = true;
+
+  titleForm.setAttribute('pattern', '[A-z 0-9.]+');
+  descForm.setAttribute('pattern', '[A-z 0-9.]+');
+  dueForm.setAttribute('pattern', '[0-9][0-9]\/[0-9][0-9]\/[0-9][0-9]');
+
+  return [titleForm, descForm, dueForm, priorityForm];
 }
 
 function form(name) {
@@ -42,15 +62,26 @@ function addTask() {
   const priority = document.querySelector('#Priority');
   const list = document.getElementById('todo');
 
+  const validityCont = [title, description, due, priority];
+  for (let i in validityCont) {
+    if (!validityCont[i].checkValidity()) {
+      console.log('Invalid');
+      return;
+    }
+  }
+
   const element = document.createElement('p');
   element.setAttribute('id', 'task');
-  element.innerHTML += `${title.value} | `;
-  element.innerHTML += `${description.value} | `;
-  element.innerHTML += `${due.value} | `;
-  element.innerHTML += `${priority.value}`;
+
+  for (let i in validityCont) {
+    element.innerHTML += `${validityCont[i].value} | `;
+    validityCont[i].value = null;
+  }
+
   element.append(deleteButton());
 
   list.append(element);
+
 }
 
 function deleteButton() {
